@@ -17,6 +17,7 @@ public class FlowChart implements Diagram {
   private Duration lastFrameDuration = Duration.ofSeconds(1);
   private Collection<DiagramNode> items;
   private Collection<DiagramNodeTransformation> transforms;
+  private Collection<DiagramReferenceGrid> grids;
 
   public Duration getTotalLength() {
     if (totalLength == null) {

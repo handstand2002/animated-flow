@@ -4,6 +4,8 @@ package com.brokencircuits.animatedflow.dsl;
 import com.brokencircuits.animatedflow.ColorUtil;
 import com.brokencircuits.animatedflow.Stats;
 import com.brokencircuits.animatedflow.Stats.Task;
+import com.brokencircuits.animatedflow.evaluator.EvaluationContext;
+import com.brokencircuits.animatedflow.evaluator.LocationalNode;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.time.Duration;
@@ -27,8 +29,10 @@ public class DiagramRectangle implements DiagramNode {
   private String id;
   private int height;
   private int width;
-  private int x;
-  private int y;
+  private Integer x;
+  private Integer y;
+  private String locationReference;
+
   @Default
   private String fillColor = "BLACK";
   @Default
@@ -38,7 +42,8 @@ public class DiagramRectangle implements DiagramNode {
 
   @Override
   public void draw(Graphics g, Duration atTime,
-      Collection<DiagramNodeTransformation> applicableTransformations) {
+      Collection<DiagramNodeTransformation> applicableTransformations,
+      EvaluationContext ctx) {
 
     Task sortTask = Stats.start("Sort Transforms");
     List<DiagramNodeTransformation> transformations = new ArrayList<>(applicableTransformations);
@@ -60,8 +65,13 @@ public class DiagramRectangle implements DiagramNode {
     findTransformsTask.stop();
 
     Task updateCoordinatesTask = Stats.start("Update coordinates");
-    int effectiveX = lastApplied.map(DiagramNodeTransformation::getNewX).orElse(this.getX());
-    int effectiveY = lastApplied.map(DiagramNodeTransformation::getNewY).orElse(this.getY());
+
+    Coordinates preTransformCoordinates = lastApplied.map(LocationalNode::from)
+        .map(ctx.getReferenceGridResolver()::resolve)
+        .orElseGet(() -> ctx.getReferenceGridResolver().resolve(LocationalNode.from(this)));
+    int currentFrameX = preTransformCoordinates.x();
+    int currentFrameY = preTransformCoordinates.y();
+
     if (currentTransform.isPresent()) {
       DiagramNodeTransformation transform = currentTransform.get();
       long transformTotalTime =
@@ -69,8 +79,13 @@ public class DiagramRectangle implements DiagramNode {
       double atTimePcnt =
           (atTime.toMillis() - transform.getStartTime().toMillis()) / (double) transformTotalTime;
 
-      effectiveX = (int) (effectiveX + ((transform.getNewX() - effectiveX) * atTimePcnt));
-      effectiveY = (int) (effectiveY + ((transform.getNewY() - effectiveY) * atTimePcnt));
+      Coordinates postTransformCoordinates = ctx.getReferenceGridResolver()
+          .resolve(LocationalNode.from(currentTransform.get()));
+
+      currentFrameX = (int) (preTransformCoordinates.x()
+          + ((postTransformCoordinates.x() - preTransformCoordinates.x()) * atTimePcnt));
+      currentFrameY = (int) (preTransformCoordinates.y()
+          + ((postTransformCoordinates.y() - preTransformCoordinates.y()) * atTimePcnt));
     }
     updateCoordinatesTask.stop();
 
@@ -79,7 +94,7 @@ public class DiagramRectangle implements DiagramNode {
     Task fillColorTask = Stats.start("FillColor");
     if (this.fillColor != null) {
       g.setColor(ColorUtil.get(this.fillColor));
-      g.fillRect(effectiveX, effectiveY, width, height);
+      g.fillRect(currentFrameX, currentFrameY, width, height);
       g.setColor(origColor);
     }
     fillColorTask.stop();
@@ -87,14 +102,14 @@ public class DiagramRectangle implements DiagramNode {
     Task outlineColorTask = Stats.start("OutlineColor");
     if (outlineColor != null) {
       g.setColor(ColorUtil.get(outlineColor));
-      g.drawRect(effectiveX, effectiveY, width, height);
+      g.drawRect(currentFrameX, currentFrameY, width, height);
       g.setColor(origColor);
     }
     outlineColorTask.stop();
 
     Task drawTextTask = Stats.start("DrawText");
     if (text != null) {
-      textConfig.draw(g, text, new Coordinates(effectiveX, effectiveY));
+      textConfig.draw(g, text, new Coordinates(currentFrameX, currentFrameY));
     }
     drawTextTask.stop();
   }

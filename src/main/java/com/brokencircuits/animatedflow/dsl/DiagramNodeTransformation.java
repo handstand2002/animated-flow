@@ -15,5 +15,6 @@ public class DiagramNodeTransformation {
   private Duration endTime;
   private Integer newX;
   private Integer newY;
+  private String newLocationReference;
 
 }

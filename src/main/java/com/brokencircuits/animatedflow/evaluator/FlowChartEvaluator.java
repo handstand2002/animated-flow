@@ -28,11 +28,15 @@ public class FlowChartEvaluator {
   public List<DiagramFrame> renderAnimated(FlowChart chart) {
     long startTime = System.nanoTime();
     List<PreRenderFrameDetails> preCalculatedFrames = calculateFrames(chart);
+    EvaluationContext ctx = EvaluationContext.builder()
+        .referenceGridResolver(new ReferenceGridResolver(chart.getGrids()))
+        .build();
 
     List<DiagramFrame> frames = new LinkedList<>();
     Duration currentTime = Duration.ZERO;
     for (PreRenderFrameDetails preCalculatedFrame : preCalculatedFrames) {
-      frames.add(new DiagramFrame(render(chart, currentTime), preCalculatedFrame.length()));
+      BufferedImage frameImg = render(chart, currentTime, ctx);
+      frames.add(new DiagramFrame(frameImg, preCalculatedFrame.length()));
       currentTime = currentTime.plus(preCalculatedFrame.length());
     }
     log.info("Rendered all {} frames in {}", frames.size(),
@@ -88,14 +92,15 @@ public class FlowChartEvaluator {
   private Duration findNextTransformStart(List<DiagramNodeTransformation> transformations,
       Duration fromTime) {
     for (DiagramNodeTransformation transformation : transformations) {
-      if (transformation.getStartTime().compareTo(fromTime) >= 0) {
+      if (transformation.getStartTime().compareTo(fromTime) > 0) {
         return transformation.getStartTime();
       }
     }
     return null;
   }
 
-  public BufferedImage render(FlowChart chart, Duration atTime) {
+  public BufferedImage render(FlowChart chart, Duration atTime,
+      EvaluationContext ctx) {
 
     int height = chart.getHeight();
     int width = chart.getWidth();
@@ -113,7 +118,8 @@ public class FlowChartEvaluator {
           .filter(t -> Objects.equals(t.getObjectId(), item.getId()))
           .toList();
       Color origColor = g.getColor();
-      item.draw(g, atTime, applicableTransformations);
+
+      item.draw(g, atTime, applicableTransformations, ctx);
       g.setColor(origColor);
     }
 

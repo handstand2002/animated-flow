@@ -1,5 +1,6 @@
 package com.brokencircuits.animatedflow.dsl;
 
+import com.brokencircuits.animatedflow.evaluator.EvaluationContext;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -18,5 +19,6 @@ public interface DiagramNode {
   String getId();
 
   void draw(Graphics g, Duration frame,
-      Collection<DiagramNodeTransformation> applicableTransformations);
+      Collection<DiagramNodeTransformation> applicableTransformations,
+      EvaluationContext ctx);
 }

@@ -3,14 +3,16 @@ package com.brokencircuits.animatedflow;
 import com.brokencircuits.animatedflow.dsl.Diagram;
 import com.brokencircuits.animatedflow.dsl.DiagramNodeTransformation;
 import com.brokencircuits.animatedflow.dsl.DiagramRectangle;
+import com.brokencircuits.animatedflow.dsl.DiagramReferenceGrid;
 import com.brokencircuits.animatedflow.dsl.FlowChart;
-import com.brokencircuits.animatedflow.dsl.NodeTextConfig;
 import com.brokencircuits.animatedflow.evaluator.FlowChartEvaluator;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -43,22 +45,35 @@ public class ImageController {
     chart.setHeight(400);
     chart.setWidth(600);
 
+    chart.setGrids(List.of(
+        DiagramReferenceGrid.builder()
+            .id("root")
+            .horizontalSpanWidth(20)
+            .verticalSpanWidth(20)
+            .x(0)
+            .y(0)
+            .build()
+    ));
     chart.setItems(List.of(
         DiagramRectangle.builder()
             .id("o2")
-            .width(30)
-            .height(30)
+            .width(20)
+            .height(20)
             .fillColor("BLACK")
-            .x(60)
-            .y(50)
-            .text("O1")
-            .textConfig(NodeTextConfig.builder()
-                .build())
+            .locationReference("root[0][0]")
             .build()
     ));
-    chart.setTransforms(List.of(
-        new DiagramNodeTransformation("o2", Duration.ofSeconds(5), Duration.ofSeconds(6), 150,
-            50)));
+    Collection<DiagramNodeTransformation> transforms = new LinkedList<>();
+    Duration lastTime = Duration.ZERO;
+    for (int i = 1; i < 10; i++) {
+      String ref = String.format("root[%d][%d]", i, i % 2);
+      log.info("Adding ref: {}", ref);
+      transforms.add(
+          new DiagramNodeTransformation("o2", lastTime.plusMillis(500), lastTime.plusMillis(500),
+              null, null, ref));
+      lastTime = lastTime.plusSeconds(1);
+    }
+    chart.setTransforms(transforms);
     return createDiagram(chart);
   }
 
