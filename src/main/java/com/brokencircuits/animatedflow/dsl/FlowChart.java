@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class FlowChart implements Diagram {
 
-  private String backgroundColor = "BLACK";
+  private String backgroundColor = "WHITE";
   private int width = 200;
   private int height = 200;
   private boolean loop = true;
@@ -20,8 +20,9 @@ public class FlowChart implements Diagram {
 
   public Duration getTotalLength() {
     if (totalLength == null) {
-      totalLength = transforms.stream().map(DiagramNodeTransformation::getEndTime).max(
-          Comparator.comparingLong(Duration::toMillis)).orElse(Duration.ZERO);
+      totalLength = transforms.stream()
+          .map(DiagramNodeTransformation::getEndTime)
+          .max(Comparator.comparingLong(Duration::toMillis)).orElse(Duration.ZERO);
       totalLength = totalLength.plus(lastFrameDuration);
     }
     return totalLength;

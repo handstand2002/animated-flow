@@ -2,9 +2,9 @@ package com.brokencircuits.animatedflow.evaluator;
 
 import com.brokencircuits.animatedflow.ColorUtil;
 import com.brokencircuits.animatedflow.DiagramFrame;
+import com.brokencircuits.animatedflow.Stats;
 import com.brokencircuits.animatedflow.dsl.DiagramNode;
 import com.brokencircuits.animatedflow.dsl.DiagramNodeTransformation;
-import com.brokencircuits.animatedflow.dsl.DiagramRectangle;
 import com.brokencircuits.animatedflow.dsl.FlowChart;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -26,6 +26,7 @@ public class FlowChartEvaluator {
   }
 
   public List<DiagramFrame> renderAnimated(FlowChart chart) {
+    long startTime = System.nanoTime();
     List<PreRenderFrameDetails> preCalculatedFrames = calculateFrames(chart);
 
     List<DiagramFrame> frames = new LinkedList<>();
@@ -34,15 +35,10 @@ public class FlowChartEvaluator {
       frames.add(new DiagramFrame(render(chart, currentTime), preCalculatedFrame.length()));
       currentTime = currentTime.plus(preCalculatedFrame.length());
     }
-
-//    frames.add(new DiagramFrame(render(chart, 0), Duration.ofSeconds(2)));
-
-//    int currentFrame = chart.getFps() * 2;
-//    while (currentFrame < chart.getFps() * 4) {
-//      frames.add(new DiagramFrame(render(chart, currentFrame), Duration.ofMillis(40)));
-//      currentFrame++;
-//    }
-
+    log.info("Rendered all {} frames in {}", frames.size(),
+        Duration.ofNanos(System.nanoTime() - startTime));
+    Stats.log();
+    Stats.reset();
     return frames;
   }
 
@@ -78,9 +74,11 @@ public class FlowChartEvaluator {
     return frames;
   }
 
-  private boolean isInTransform(Duration atTime, List<DiagramNodeTransformation> transformationsSortedByStartTime) {
+  private boolean isInTransform(Duration atTime,
+      List<DiagramNodeTransformation> transformationsSortedByStartTime) {
     for (DiagramNodeTransformation transformation : transformationsSortedByStartTime) {
-      if (transformation.getStartTime().compareTo(atTime) <= 0 && transformation.getEndTime().compareTo(atTime) > 0) {
+      if (transformation.getStartTime().compareTo(atTime) <= 0
+          && transformation.getEndTime().compareTo(atTime) > 0) {
         return true;
       }
     }
@@ -97,18 +95,6 @@ public class FlowChartEvaluator {
     return null;
   }
 
-  /*
-  |----------------------------------------|
-  |   s---------e                          |
-  |        s----------e                    |
-  |                       s---------e      |
-
-   */
-  private PreRenderFrameDetails nextFrame(FlowChart chart, Duration atTime) {
-    return null;
-  }
-
-  // TODO: pass in a context that can be used for caching
   public BufferedImage render(FlowChart chart, Duration atTime) {
 
     int height = chart.getHeight();
@@ -132,15 +118,6 @@ public class FlowChartEvaluator {
     }
 
     return bufferedImage;
-  }
-
-  private void updateChart(FlowChart chart) {
-    for (DiagramNode item : chart.getItems()) {
-      if (item instanceof DiagramRectangle rect) {
-        rect.setX(rect.getX() * 2);
-        rect.setY(rect.getY() * 2);
-      }
-    }
   }
 
 }

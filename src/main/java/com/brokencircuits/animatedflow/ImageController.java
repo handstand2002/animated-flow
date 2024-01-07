@@ -4,6 +4,7 @@ import com.brokencircuits.animatedflow.dsl.Diagram;
 import com.brokencircuits.animatedflow.dsl.DiagramNodeTransformation;
 import com.brokencircuits.animatedflow.dsl.DiagramRectangle;
 import com.brokencircuits.animatedflow.dsl.FlowChart;
+import com.brokencircuits.animatedflow.dsl.NodeTextConfig;
 import com.brokencircuits.animatedflow.evaluator.FlowChartEvaluator;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -39,17 +40,25 @@ public class ImageController {
   @GetMapping(path = "/test", produces = MediaType.IMAGE_GIF_VALUE)
   public byte[] test() throws IOException {
     FlowChart chart = new FlowChart();
-//    chart.setTotalLength(Duration.ofSeconds(8));
+    chart.setHeight(400);
+    chart.setWidth(600);
+
     chart.setItems(List.of(
-        new DiagramRectangle("o1", 20, 20, 40, 40, "WHITE", "WHITE"),
-        new DiagramRectangle("o2", 20, 20, 60, 40, "WHITE", "WHITE")
+        DiagramRectangle.builder()
+            .id("o2")
+            .width(30)
+            .height(30)
+            .fillColor("BLACK")
+            .x(60)
+            .y(50)
+            .text("O1")
+            .textConfig(NodeTextConfig.builder()
+                .build())
+            .build()
     ));
     chart.setTransforms(List.of(
-        new DiagramNodeTransformation("o1", Duration.ofSeconds(2), Duration.ofSeconds(3), 0, 0),
-//        new DiagramNodeTransformation("o1", Duration.ofSeconds(5), Duration.ofSeconds(6), 80, 80),
-        new DiagramNodeTransformation("o2", Duration.ofSeconds(5), Duration.ofSeconds(6), 150, 150)
-
-        ));
+        new DiagramNodeTransformation("o2", Duration.ofSeconds(5), Duration.ofSeconds(6), 150,
+            50)));
     return createDiagram(chart);
   }
 
