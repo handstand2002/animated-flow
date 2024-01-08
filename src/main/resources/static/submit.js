@@ -8,34 +8,27 @@ function doSubmit(form) {
     var item = createItemFromDiv(div)
     chart.items.push(item)
   }
-//  var rect = {}
-//  rect.type = "rectangle"
-//  rect.height = 20
-//  rect.width = 20
-//  rect.x = 10
-//  rect.y = 10
-//  chart.items.push(rect)
 
   console.log(chart)
   var json = JSON.stringify(chart)
-  console.log(json)
+//  console.log(json)
   document.getElementById("response").src = "/diagram?d=" + encodeURIComponent(json)
 }
 
 function createItemFromDiv(div) {
   var item = {}
-  console.log("div: ", div)
-  for (childIdx in div.childNodes) {
 
-    var attributeNode = div.childNodes[childIdx]
-    if (attributeNode == null) {
+  for (let i = 0; i < div.childNodes.length; i++) {
+
+    var attributeNode = div.childNodes[i]
+    if (attributeNode.id == null || attributeNode.id.length == 0) {
       continue
     }
-    if (attributeNode.tagName == "INPUT" || attributeNode.tagName == "SELECT") {
-      var attributeName = attributeNameFromId(attributeNode.id)
-      if (attributeNode.value.length > 0) {
-        item[attributeName] = attributeNode.value;
-      }
+    var attributeName = attributeNameFromId(attributeNode.id)
+    console.log(attributeNode.id + "-input")
+    var inputValue = document.getElementById(attributeNode.id + "-input").value
+    if (inputValue.length > 0) {
+      item[attributeName] = inputValue;
     }
   }
   return item;
@@ -74,56 +67,107 @@ function createItemDiv() {
   delLink.style.paddingRight = "5px"
   div.appendChild(delLink)
 
-  var idInput = document.createElement("input")
-  idInput.id = "item-id-" + itemId
-  addOption(div, "ID (Opt)", idInput)
-
   var typeInput = document.createElement("select")
-  typeInput.id = "item-type-" + itemId
+  typeInput.setAttribute("onchange", "hideIrrelevantOptions(this)")
   var rectOpt = document.createElement("option")
   rectOpt.value = "rectangle"
   rectOpt.innerText = "Rectangle"
   typeInput.appendChild(rectOpt)
-  addOption(div, "Type", typeInput)
+  var gridOpt = document.createElement("option")
+  gridOpt.value = "grid"
+  gridOpt.innerText = "Grid"
+  typeInput.appendChild(gridOpt)
+  var textOpt = document.createElement("option")
+  textOpt.value = "text"
+  textOpt.innerText = "Text"
+  typeInput.appendChild(textOpt)
+  optionId = "item-type-" + itemId
+  addOption(div, "Type", typeInput, optionId)
+
+  var idInput = document.createElement("input")
+  optionId = "item-id-" + itemId
+  addOption(div, "ID (Opt)", idInput, optionId)
 
   var heightInput = document.createElement("input")
-  heightInput.id = "item-height-" + itemId
-  addOption(div, "Height", heightInput);
+  optionId = "item-height-" + itemId
+  addOption(div, "Height", heightInput, optionId);
 
   var widthInput = document.createElement("input")
-  widthInput.id = "item-width-" + itemId
-  addOption(div, "Width", widthInput);
+  optionId = "item-width-" + itemId
+  addOption(div, "Width", widthInput, optionId);
 
   var xInput = document.createElement("input")
-  xInput.id = "item-x-" + itemId
-  addOption(div, "X coor (Opt)", xInput);
+  optionId = "item-x-" + itemId
+  addOption(div, "X coor (Opt)", xInput, optionId);
 
   var yInput = document.createElement("input")
-  yInput.id = "item-y-" + itemId
-  addOption(div, "Y coor (Opt)", yInput);
+  optionId = "item-y-" + itemId
+  addOption(div, "Y coor (Opt)", yInput, optionId);
 
   var locationReferenceInput = document.createElement("input")
-  locationReferenceInput.id = "item-y-" + itemId
-  addOption(div, "Loc Ref (Opt)", locationReferenceInput);
+  optionId = "item-locationReference-" + itemId
+  addOption(div, "Loc Ref (Opt)", locationReferenceInput, optionId);
 
   var fillColorInput = document.createElement("input")
-  fillColorInput.id = "item-fillColor-" + itemId
-  addOption(div, "Fill Color (Opt)", fillColorInput);
+  optionId = "item-fillColor-" + itemId
+  addOption(div, "Fill Color (Opt)", fillColorInput, optionId);
 
   var outlineColorInput = document.createElement("input")
-  outlineColorInput.id = "item-outlineColor-" + itemId
-  addOption(div, "Outline Color (Opt)", outlineColorInput);
+  optionId = "item-outlineColor-" + itemId
+  addOption(div, "Outline Color (Opt)", outlineColorInput, optionId);
 
   div.appendChild(document.createElement("br"))
+
+  hideIrrelevantOptions(typeInput)
   return div;
 }
 
-function addOption(div, label, input) {
+const RECTANGLE_PARAMETERS = ["id", "type", "height", "width", "x", "y", "locationReference", "fillColor", "outlineColor"]
+const GRID_PARAMETERS = ["id", "type", "x", "y", "locationReference", "spanWidth", "spanHeight"]
+const TEXT_PARAMETERS = ["id", "type", "x", "y", "locationReference", "text"]
+// TODO: add text config parameters
+
+function hideIrrelevantOptions(typeSelector) {
+  var requiredParams = ["type"]
+  if (typeSelector.value == "rectangle") {
+    requiredParams = RECTANGLE_PARAMETERS
+  } else if (typeSelector.value == "grid") {
+    requiredParams = GRID_PARAMETERS
+  } else if (typeSelector.value == "text") {
+    requiredParams = TEXT_PARAMETERS
+  }
+
+  div = typeSelector.parentNode.parentNode
+
+  for (let i = 0; i < div.childNodes.length; i++) {
+
+    var attributeNode = div.childNodes[i]
+    if (attributeNode.id == null || !attributeNode.id.startsWith("item-")) {
+      continue
+    }
+
+    var attributeName = attributeNameFromId(attributeNode.id)
+    if (requiredParams.includes(attributeName)) {
+      attributeNode.hidden = false
+    } else {
+      attributeNode.hidden = true
+      attributeNode.inputField.value = ""
+    }
+  }
+}
+
+function addOption(div, label, input, optionId) {
+  input.id = optionId + "-input"
+  var parentDiv = document.createElement("div")
+  parentDiv.id = optionId
   var idLabel = document.createElement("text")
+
   idLabel.innerText = label
-  div.appendChild(idLabel);
-  div.appendChild(input);
-  div.appendChild(document.createElement("br"))
+  parentDiv.appendChild(idLabel);
+  parentDiv.appendChild(input);
+  parentDiv.appendChild(document.createElement("br"))
+  parentDiv.inputField = input;
+  div.appendChild(parentDiv)
 }
 
 function deleteItemDiv(div) {

@@ -32,7 +32,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Node;
@@ -85,7 +84,9 @@ public class ImageController {
               null, null, ref));
       lastTime = lastTime.plusSeconds(1);
     }
-    transforms.add(new DiagramNodeTransformation("root", Duration.ofSeconds(4), Duration.ofSeconds(10), 0, 100, null));
+    transforms.add(
+        new DiagramNodeTransformation("root", Duration.ofSeconds(4), Duration.ofSeconds(10), 0, 100,
+            null));
     chart.setTransforms(transforms);
     return createDiagram(chart);
   }
@@ -98,15 +99,12 @@ public class ImageController {
   }
 
   @GetMapping(path = "/diagram", produces = MediaType.IMAGE_GIF_VALUE)
-  public byte[] createDiagram2(@RequestParam Diagram d) throws IOException {
-    return createDiagram(d);
-  }
+  public byte[] createDiagram(@RequestParam Diagram d) throws IOException {
 
-  public byte[] createDiagram(@RequestBody Diagram diagram) throws IOException {
-
-    if (!(diagram instanceof FlowChart chart)) {
+    if (!(d instanceof FlowChart chart)) {
       throw new IllegalStateException("Unsupported chart type");
     }
+    log.info("Diagram: {}", d);
 
     Iterator<ImageWriter> gif = ImageIO.getImageWritersByFormatName("gif");
     ImageWriter writer = gif.next();
