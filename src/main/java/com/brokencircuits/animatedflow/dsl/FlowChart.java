@@ -19,22 +19,6 @@ public class FlowChart implements Diagram {
   private Collection<DiagramNode> items = new LinkedList<>();
   private Collection<DiagramNodeTransformation> transforms = new LinkedList<>();
 
-  /*
-  items:
-    - type: grid
-      id: t1
-      x: 0
-      y: 0
-      span-width: 20
-      span-height: 20
-    - type: rectangle
-      id: o1
-      location-reference: t1[0][0]
-    - type: text
-      location-reference: o1
-
-   */
-
   public Duration getTotalLength() {
     if (totalLength == null) {
       totalLength = transforms.stream()

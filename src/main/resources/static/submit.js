@@ -16,6 +16,14 @@ function doSubmit(form) {
     chart.transforms.push(xform)
   }
 
+  chart.backgroundColor = document.getElementById("chart-backgroundColor").value
+  chart.width = document.getElementById("chart-width").value
+  chart.height = document.getElementById("chart-height").value
+  chart.loop = document.getElementById("chart-loop").checked
+  chart.fps = document.getElementById("chart-fps").value
+  chart.lastFrameDuration = document.getElementById("chart-lastFrameDuration").value
+  chart.totalLength = document.getElementById("chart-totalLength").value
+
   console.log(chart)
   var json = JSON.stringify(chart)
 //  console.log(json)

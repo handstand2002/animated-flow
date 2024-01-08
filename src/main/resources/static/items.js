@@ -8,7 +8,6 @@ function createItemFromDiv(div) {
       continue
     }
     var attributeName = attributeNameFromId(attributeNode.id)
-    console.log(attributeNode.id + "-input")
     var inputValue = document.getElementById(attributeNode.id + "-input").value
     if (inputValue.length > 0) {
       item[attributeName] = inputValue;
@@ -157,7 +156,6 @@ function addOption(div, label, input, optionId) {
 }
 
 function deleteItemDiv(div) {
-  console.log("Deleting ", div);
   const index = itemDivs.indexOf(div);
   if (index > -1) {
     itemDivs.splice(index, 1);

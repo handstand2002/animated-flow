@@ -9,14 +9,47 @@
 </head>
 <body>
 
+<table>
+  <tr>
+    <td>backgroundColor</td>
+    <td><input id="chart-backgroundColor" value="WHITE"></td>
+  </tr>
+  <tr>
+    <td>width</td>
+    <td><input id="chart-width" value="300"></td>
+  </tr>
+  <tr>
+    <td>height</td>
+    <td><input id="chart-height" value="200"></td>
+  </tr>
+  <tr>
+    <td>loop</td>
+    <td><input id="chart-loop" type="checkbox" checked></td>
+  </tr>
+  <tr>
+    <td>fps</td>
+    <td><input id="chart-fps" value="25"></td>
+  </tr>
+  <tr>
+    <td>lastFrameDuration</td>
+    <td><input id="chart-lastFrameDuration" value="PT1S"></td>
+  </tr>
+  <tr>
+    <td>totalLength</td>
+    <td><input id="chart-totalLength"></td>
+  </tr>
+</table>
+
 <div id="items"></div>
-<button onclick="newItem()">Add Item</button><br><br>
+<button onclick="newItem()">Add Item</button>
+<br><br>
 
 <div id="transforms"></div>
-<button onclick="newTransform()">Add Transform</button><br><br>
+<button onclick="newTransform()">Add Transform</button>
+<br><br>
 
 <button onclick="doSubmit(this)">Generate</button>
 <br>
-<iframe width="100%" id="response"></iframe>
+<img id="response">
 </body>
 </html>

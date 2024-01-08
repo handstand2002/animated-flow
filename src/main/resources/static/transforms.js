@@ -8,7 +8,6 @@ function createTransformFromDiv(div) {
       continue
     }
     var attributeName = transformAttributeNameFromId(attributeNode.id)
-    console.log(attributeNode.id + "-input")
     var inputValue = document.getElementById(attributeNode.id + "-input").value
     if (inputValue.length > 0) {
       transform[attributeName] = inputValue;
@@ -69,7 +68,6 @@ function addTransformOption(div, label, input, optionId) {
 }
 
 function deleteTransformDiv(div) {
-  console.log("Deleting ", div);
   const index = transformDivs.indexOf(div);
   if (index > -1) {
     transformDivs.splice(index, 1);
