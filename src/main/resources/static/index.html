@@ -4,14 +4,19 @@
   <meta charset="UTF-8">
   <title>Diagram</title>
   <script src="submit.js"></script>
+  <script src="items.js"></script>
+  <script src="transforms.js"></script>
 </head>
 <body>
 
 <div id="items"></div>
-<button onclick="newItem()">Add Item</button><br>
+<button onclick="newItem()">Add Item</button><br><br>
+
+<div id="transforms"></div>
+<button onclick="newTransform()">Add Transform</button><br><br>
 
 <button onclick="doSubmit(this)">Generate</button>
 <br>
-<iframe id="response"></iframe>
+<iframe width="100%" id="response"></iframe>
 </body>
 </html>
