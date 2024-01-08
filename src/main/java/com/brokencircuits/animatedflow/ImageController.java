@@ -8,6 +8,8 @@ import com.brokencircuits.animatedflow.dsl.DiagramText;
 import com.brokencircuits.animatedflow.dsl.FlowChart;
 import com.brokencircuits.animatedflow.dsl.NodeTextConfig;
 import com.brokencircuits.animatedflow.evaluator.FlowChartEvaluator;
+import com.brokencircuits.animatedflow.spring.GenericPropertyEditor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,9 +29,11 @@ import javax.imageio.stream.ImageOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -40,6 +44,7 @@ import org.w3c.dom.NodeList;
 public class ImageController {
 
   private final FlowChartEvaluator flowChartEvaluator;
+  private final ObjectMapper objectMapper;
 
   @GetMapping(path = "/test", produces = MediaType.IMAGE_GIF_VALUE)
   public byte[] test() throws IOException {
@@ -85,7 +90,18 @@ public class ImageController {
     return createDiagram(chart);
   }
 
-  @PostMapping(path = "/diagram2", produces = MediaType.IMAGE_GIF_VALUE)
+  // support using diagram as request parameter
+  @InitBinder
+  public void initBinder(WebDataBinder binder) {
+    binder.registerCustomEditor(Diagram.class,
+        new GenericPropertyEditor<>(objectMapper, Diagram.class));
+  }
+
+  @GetMapping(path = "/diagram", produces = MediaType.IMAGE_GIF_VALUE)
+  public byte[] createDiagram2(@RequestParam Diagram d) throws IOException {
+    return createDiagram(d);
+  }
+
   public byte[] createDiagram(@RequestBody Diagram diagram) throws IOException {
 
     if (!(diagram instanceof FlowChart chart)) {
