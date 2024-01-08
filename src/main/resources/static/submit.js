@@ -116,6 +116,15 @@ function createItemDiv() {
   optionId = "item-outlineColor-" + itemId
   addOption(div, "Outline Color (Opt)", outlineColorInput, optionId);
 
+  addOption(div, "Text", document.createElement("input"), "item-text-" + itemId);
+  addOption(div, "Font Name (Opt)", document.createElement("input"), "item-fontName-" + itemId);
+  addOption(div, "Font Style (Opt)", document.createElement("input"), "item-style-" + itemId);
+  addOption(div, "Font Size (Opt)", document.createElement("input"), "item-size-" + itemId);
+  addOption(div, "Font Color (Opt)", document.createElement("input"), "item-color-" + itemId);
+  addOption(div, "Padding (Opt)", document.createElement("input"), "item-padding-" + itemId);
+  addOption(div, "PaddingLeft (Opt)", document.createElement("input"), "item-paddingLeft-" + itemId);
+  addOption(div, "PaddingTop (Opt)", document.createElement("input"), "item-paddingTop-" + itemId);
+
   div.appendChild(document.createElement("br"))
 
   hideIrrelevantOptions(typeInput)
@@ -124,8 +133,7 @@ function createItemDiv() {
 
 const RECTANGLE_PARAMETERS = ["id", "type", "height", "width", "x", "y", "locationReference", "fillColor", "outlineColor"]
 const GRID_PARAMETERS = ["id", "type", "x", "y", "locationReference", "spanWidth", "spanHeight"]
-const TEXT_PARAMETERS = ["id", "type", "x", "y", "locationReference", "text"]
-// TODO: add text config parameters
+const TEXT_PARAMETERS = ["id", "type", "x", "y", "locationReference", "text", "fontName", "style", "size", "color", "padding", "paddingLeft", "paddingTop"]
 
 function hideIrrelevantOptions(typeSelector) {
   var requiredParams = ["type"]

@@ -6,7 +6,6 @@ import com.brokencircuits.animatedflow.dsl.DiagramRectangle;
 import com.brokencircuits.animatedflow.dsl.DiagramReferenceGrid;
 import com.brokencircuits.animatedflow.dsl.DiagramText;
 import com.brokencircuits.animatedflow.dsl.FlowChart;
-import com.brokencircuits.animatedflow.dsl.NodeTextConfig;
 import com.brokencircuits.animatedflow.evaluator.FlowChartEvaluator;
 import com.brokencircuits.animatedflow.spring.GenericPropertyEditor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,9 +68,7 @@ public class ImageController {
         DiagramText.builder()
             .locationReference("o2")
             .text("test")
-            .textConfig(NodeTextConfig.builder()
-                .color("RED")
-                .build())
+            .color("RED")
             .build()
     ));
     Collection<DiagramNodeTransformation> transforms = new LinkedList<>();
