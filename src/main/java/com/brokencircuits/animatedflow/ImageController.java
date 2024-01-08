@@ -4,7 +4,9 @@ import com.brokencircuits.animatedflow.dsl.Diagram;
 import com.brokencircuits.animatedflow.dsl.DiagramNodeTransformation;
 import com.brokencircuits.animatedflow.dsl.DiagramRectangle;
 import com.brokencircuits.animatedflow.dsl.DiagramReferenceGrid;
+import com.brokencircuits.animatedflow.dsl.DiagramText;
 import com.brokencircuits.animatedflow.dsl.FlowChart;
+import com.brokencircuits.animatedflow.dsl.NodeTextConfig;
 import com.brokencircuits.animatedflow.evaluator.FlowChartEvaluator;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -45,22 +47,27 @@ public class ImageController {
     chart.setHeight(400);
     chart.setWidth(600);
 
-    chart.setGrids(List.of(
+    chart.setItems(List.of(
         DiagramReferenceGrid.builder()
             .id("root")
-            .horizontalSpanWidth(20)
-            .verticalSpanWidth(20)
+            .spanWidth(20)
+            .spanHeight(20)
             .x(0)
             .y(0)
-            .build()
-    ));
-    chart.setItems(List.of(
+            .build(),
         DiagramRectangle.builder()
             .id("o2")
             .width(20)
             .height(20)
             .fillColor("BLACK")
             .locationReference("root[0][0]")
+            .build(),
+        DiagramText.builder()
+            .locationReference("o2")
+            .text("test")
+            .textConfig(NodeTextConfig.builder()
+                .color("RED")
+                .build())
             .build()
     ));
     Collection<DiagramNodeTransformation> transforms = new LinkedList<>();
@@ -69,10 +76,11 @@ public class ImageController {
       String ref = String.format("root[%d][%d]", i, i % 2);
       log.info("Adding ref: {}", ref);
       transforms.add(
-          new DiagramNodeTransformation("o2", lastTime.plusMillis(500), lastTime.plusMillis(500),
+          new DiagramNodeTransformation("o2", lastTime.plusMillis(500), lastTime.plusMillis(1000),
               null, null, ref));
       lastTime = lastTime.plusSeconds(1);
     }
+    transforms.add(new DiagramNodeTransformation("root", Duration.ofSeconds(4), Duration.ofSeconds(10), 0, 100, null));
     chart.setTransforms(transforms);
     return createDiagram(chart);
   }

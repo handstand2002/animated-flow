@@ -29,7 +29,7 @@ public class FlowChartEvaluator {
     long startTime = System.nanoTime();
     List<PreRenderFrameDetails> preCalculatedFrames = calculateFrames(chart);
     EvaluationContext ctx = EvaluationContext.builder()
-        .referenceGridResolver(new ReferenceGridResolver(chart.getGrids()))
+        .locationResolver(new LocationResolver(chart.getTransforms()))
         .build();
 
     List<DiagramFrame> frames = new LinkedList<>();
@@ -38,6 +38,7 @@ public class FlowChartEvaluator {
       BufferedImage frameImg = render(chart, currentTime, ctx);
       frames.add(new DiagramFrame(frameImg, preCalculatedFrame.length()));
       currentTime = currentTime.plus(preCalculatedFrame.length());
+      ctx.clearFrameState();
     }
     log.info("Rendered all {} frames in {}", frames.size(),
         Duration.ofNanos(System.nanoTime() - startTime));
@@ -49,7 +50,7 @@ public class FlowChartEvaluator {
   private List<PreRenderFrameDetails> calculateFrames(FlowChart chart) {
     long nextId = 0;
 
-    Duration millisPerTransformFrame = Duration.ofMillis(1000 / chart.getFps());
+    Duration transformFrameLength = Duration.ofMillis(1000 / chart.getFps());
 
     List<DiagramNodeTransformation> transformations = chart.getTransforms().stream()
         .sorted(Comparator.comparingLong(t -> t.getStartTime().toMillis()))
@@ -60,11 +61,13 @@ public class FlowChartEvaluator {
     while (durationCrawler.compareTo(chart.getTotalLength()) < 0) {
       Duration frameDuration;
       if (isInTransform(durationCrawler, transformations)) {
-        Duration frameEndAt = durationCrawler.plus(millisPerTransformFrame);
+        // when a transform is happening, each frame is equal duration
+        Duration frameEndAt = durationCrawler.plus(transformFrameLength);
         frameDuration = Duration.ofMillis(frameEndAt.toMillis() - durationCrawler.toMillis());
         frames.add(new PreRenderFrameDetails(nextId++, frameDuration));
         durationCrawler = frameEndAt;
       } else {
+        // when transform is not happening, a frame lasts until the next transform
         Duration frameEndAt = findNextTransformStart(transformations, durationCrawler);
         if (frameEndAt == null) {
           frameEndAt = chart.getTotalLength();
@@ -119,7 +122,8 @@ public class FlowChartEvaluator {
           .toList();
       Color origColor = g.getColor();
 
-      item.draw(g, atTime, applicableTransformations, ctx);
+      EvaluationContext innerCtx = ctx.toBuilder().graphics(g).build();
+      item.draw(atTime, applicableTransformations, innerCtx);
       g.setColor(origColor);
     }
 

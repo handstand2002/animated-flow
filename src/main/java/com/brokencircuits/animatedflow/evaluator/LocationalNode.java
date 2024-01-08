@@ -1,7 +1,7 @@
 package com.brokencircuits.animatedflow.evaluator;
 
+import com.brokencircuits.animatedflow.dsl.DiagramNode;
 import com.brokencircuits.animatedflow.dsl.DiagramNodeTransformation;
-import com.brokencircuits.animatedflow.dsl.DiagramRectangle;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +14,8 @@ public class LocationalNode {
   private final Integer y;
   private final String locationReference;
 
-  public static LocationalNode from(DiagramRectangle rectangle) {
-    return new LocationalNode(rectangle.getX(), rectangle.getY(), rectangle.getLocationReference());
+  public static LocationalNode from(DiagramNode node) {
+    return new LocationalNode(node.getX(), node.getY(), node.getLocationReference());
   }
 
   public static LocationalNode from(DiagramNodeTransformation transformation) {
